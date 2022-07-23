@@ -6,6 +6,8 @@ class AuthFirebase {
 
   dynamic userFromFirebase(User? firebaseUser) {
     // reutrn AppUser
+    print('firebase user');
+    print(firebaseUser);
     return firebaseUser == null ? null : AppUser(firebaseUser.uid);
   }
 

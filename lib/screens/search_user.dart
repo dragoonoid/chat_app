@@ -1,5 +1,6 @@
 import 'package:chatapp/model/user.dart';
 import 'package:chatapp/model/user_provider.dart';
+import 'package:chatapp/screens/conversation.dart';
 import 'package:chatapp/services/database.dart';
 import 'package:chatapp/services/get_shared_prefs.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -21,13 +22,14 @@ class _SearchUserState extends State<SearchUser> {
 
   var data = null;
   search(String s) async {
-    if (username.text == null || username.text.isEmpty ) {
+    if (username.text == null || username.text.isEmpty) {
       return;
-    }
-    else if(username.text==Provider.of<UserProvider>(context,listen: false).username){
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('You are trying to search yourself.All usernames are unique')));
-    }
-     else {
+    } else if (username.text ==
+        Provider.of<UserProvider>(context, listen: false).username) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text(
+              'You are trying to search yourself.All usernames are unique')));
+    } else {
       await db.getuserList(username.text).then((value) => snapshot = value);
       setState(() {
         data = snapshot.docs.map((doc) => doc.data()).toList();
@@ -61,8 +63,14 @@ class _SearchUserState extends State<SearchUser> {
       'emails': [searchEmail, myEmail],
     };
     await db.createChatRoom(chatId, mp);
-    Navigator.of(context)
-        .pushNamed('/conversation', arguments: {'chatId': chatId});
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) =>  Conversation(chatId: chatId,),
+      ),
+    );
+    // Navigator.of(context)
+    //     .pushNamed('/conversation', arguments: {'chatId': chatId});
   }
 
   createChatId(String a, String b) {

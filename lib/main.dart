@@ -75,9 +75,9 @@ class _MyAppState extends State<MyApp> {
         '/all_chat_screen': (context) => const AllChatScreen(),
         '/wel': (context) => Welcome(),
         '/search_user': (context) => const SearchUser(),
-        '/conversation': (context) => const Conversation()
+        //'/conversation': (context) => const Conversation()
       },
-      initialRoute: login == true ? '/all_chat_screen' : '/wel',
+      home: login == true ? const AllChatScreen() : Welcome(),
     );
   }
 }

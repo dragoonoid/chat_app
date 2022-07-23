@@ -17,21 +17,24 @@ class _SignUpState extends State<SignUp> {
   final key = GlobalKey<FormState>();
 
   AuthFirebase auth = AuthFirebase();
-  Database db=Database();
-  GetSharedPrefs prefs=GetSharedPrefs();
+  Database db = Database();
+  GetSharedPrefs prefs = GetSharedPrefs();
   bool isLoading = false;
-  signUp() async{
+  signUp() async {
     if (key.currentState!.validate()) {
       setState(() {
         isLoading = true;
       });
       var uid;
-      await auth.signUpEmail(email.text, password.text).then((value) => uid=value.userId);
-      await db.publishUser(uid,email.text,password.text,name.text);
+      await auth
+          .signUpEmail(email.text, password.text)
+          .then((value) => uid = value.userId);
+      await db.publishUser(uid, email.text, password.text, name.text);
       await prefs.setEmail(email.text);
       await prefs.setIsLogIn(true);
       await prefs.setUsername(name.text);
-      Navigator.of(context).pushNamedAndRemoveUntil('/all_chat_screen', (route) => false);
+      Navigator.of(context)
+          .pushNamedAndRemoveUntil('/all_chat_screen', (route) => false);
     }
   }
 
@@ -106,7 +109,7 @@ class _SignUpState extends State<SignUp> {
                           c: Colors.amber[300],
                           context: context,
                           t: 'Create Account',
-                          route: ()=>signUp(),
+                          route: () => signUp(),
                           weight: FontWeight.bold,
                           textColor: Colors.black),
                       button(
@@ -139,7 +142,7 @@ class _SignUpState extends State<SignUp> {
                           context: context,
                           t: 'Login with Google    ',
                           route: () =>
-                              Navigator.of(context).pushReplacementNamed('/'),
+                              Navigator.of(context).pushReplacementNamed('/signin'),
                           weight: FontWeight.bold,
                           textColor: Colors.black),
                       button(
@@ -147,7 +150,7 @@ class _SignUpState extends State<SignUp> {
                           context: context,
                           t: 'Login with Facebook',
                           route: () =>
-                              Navigator.of(context).pushReplacementNamed('/'),
+                              Navigator.of(context).pushReplacementNamed('/signin'),
                           weight: FontWeight.bold,
                           textColor: Colors.black),
                       button(
@@ -155,7 +158,7 @@ class _SignUpState extends State<SignUp> {
                           context: context,
                           t: 'Login with Apple     ',
                           route: () =>
-                              Navigator.of(context).pushReplacementNamed('/'),
+                              Navigator.of(context).pushReplacementNamed('/signin'),
                           weight: FontWeight.bold,
                           textColor: Colors.black),
                     ],
