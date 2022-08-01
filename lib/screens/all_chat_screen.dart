@@ -1,5 +1,7 @@
 import 'package:chatapp/model/user_provider.dart';
 import 'package:chatapp/screens/conversation.dart';
+import 'package:chatapp/screens/identity.dart';
+import 'package:chatapp/services/add_image.dart';
 import 'package:chatapp/services/auth.dart';
 import 'package:chatapp/services/database.dart';
 import 'package:flutter/material.dart';
@@ -16,11 +18,14 @@ class _AllChatScreenState extends State<AllChatScreen> {
   AuthFirebase auth = AuthFirebase();
   Database db = Database();
   late Stream chatRoomStream;
+  AddImage storage = AddImage();
+  String username = "";
   @override
   void initState() {
     // TODO: implement initState
-    String username =
-        Provider.of<UserProvider>(context, listen: false).username!;
+    // String username =
+    //     Provider.of<UserProvider>(context, listen: false).username!;
+    username = Provider.of<UserProvider>(context, listen: false).username ?? "";
     chatRoomStream = db.getChatRooms(username);
     super.initState();
   }
@@ -67,6 +72,7 @@ class _AllChatScreenState extends State<AllChatScreen> {
     String otherUser = chatUsers[0].toString().compareTo(username) == 0
         ? chatUsers[1]
         : chatUsers[0];
+    //String url = await storage.getProfileImage(otherUser);
     return Container(
       decoration: const BoxDecoration(
         color: Colors.white,
@@ -100,11 +106,13 @@ class _AllChatScreenState extends State<AllChatScreen> {
                 builder: (_) {
                   return AlertDialog(
                     title: const Text('Delete Chats'),
-                    content: const Text('Are you sure you eant to delete this chat room?'),
+                    content: const Text(
+                        'Are you sure you eant to delete this chat room?'),
                     actions: [
                       ElevatedButton(
                         onPressed: () async {
                           await db.deleteChatRoom(data['id']);
+                          // ignore: use_build_context_synchronously
                           Navigator.pop(context);
                         },
                         child: const Text('Yes'),
@@ -146,9 +154,11 @@ class _AllChatScreenState extends State<AllChatScreen> {
           ),
           IconButton(
             onPressed: () async {
-              await auth.signOut();
-              Navigator.of(context)
-                  .pushNamedAndRemoveUntil('/wel', (route) => false);
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) => const Identity(),
+                ),
+              );
             },
             icon: const Icon(
               Icons.account_box_sharp,

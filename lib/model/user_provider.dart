@@ -15,6 +15,9 @@ class UserProvider with ChangeNotifier{
     isLoggedIn=prefs.getBool('isLoggedIn');
     print(isLoggedIn);
     print('hi');
+    print(username);
+    print(email);
+    print(password);
     notifyListeners();
   }
 }

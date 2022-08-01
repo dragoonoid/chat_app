@@ -133,25 +133,28 @@ class _SearchUserState extends State<SearchUser> {
                     borderRadius: BorderRadius.circular(30),
                     color: Colors.white),
                 child: Center(
-                  child: Row(
-                    children: [
-                      const Icon(Icons.search),
-                      const SizedBox(
-                        width: 5,
-                      ),
-                      SizedBox(
-                        width: MediaQuery.of(context).size.width * 0.7,
-                        child: TextField(
-                          onChanged: search,
-                          onSubmitted: search,
-                          controller: username,
-                          decoration: const InputDecoration(
-                            hintText: 'Search Username',
-                            border: InputBorder.none,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal:8.0),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.search),
+                        const SizedBox(
+                          width: 5,
+                        ),
+                        SizedBox(
+                          width: MediaQuery.of(context).size.width * 0.7,
+                          child: TextField(
+                            onChanged: search,
+                            onSubmitted: search,
+                            controller: username,
+                            decoration: const InputDecoration(
+                              hintText: 'Search Username',
+                              border: InputBorder.none,
+                            ),
                           ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ),
