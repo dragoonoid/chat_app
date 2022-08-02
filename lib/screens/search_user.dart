@@ -1,6 +1,7 @@
 import 'package:chatapp/model/user.dart';
 import 'package:chatapp/model/user_provider.dart';
 import 'package:chatapp/screens/conversation.dart';
+import 'package:chatapp/services/add_image.dart';
 import 'package:chatapp/services/database.dart';
 import 'package:chatapp/services/get_shared_prefs.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -19,6 +20,7 @@ class _SearchUserState extends State<SearchUser> {
   Database db = Database();
   late QuerySnapshot snapshot;
   GetSharedPrefs prefs = GetSharedPrefs();
+  AddImage storage=AddImage();
 
   var data = null;
   search(String s) async {
@@ -57,10 +59,13 @@ class _SearchUserState extends State<SearchUser> {
     String myName = await prefs.getUsername();
     String myEmail = await prefs.getEmail();
     String chatId = createChatId(searchedUsername, myName);
+    //String myUrl=await storage.getProfileImage(myName);
+    //String Url=await storage.getProfileImage(searchedUsername);
     Map<String, dynamic> mp = {
       'id': chatId,
       'users': [searchedUsername, myName],
       'emails': [searchEmail, myEmail],
+      //'imageUrl':[Url,myUrl]
     };
     await db.createChatRoom(chatId, mp);
     Navigator.push(

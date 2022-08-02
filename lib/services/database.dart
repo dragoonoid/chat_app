@@ -9,13 +9,30 @@ class Database {
   Future publishUser(
       String uid, String email, String password, String username) async {
     Map<String, String> mp = {
-      'id': uid,
+      'id': username,
       'email': email,
       'password': password,
-      'username': username
+      'username': username,
+      'imageUrl':
+          "https://firebasestorage.googleapis.com/v0/b/chatapp-29812.appspot.com/o/user_image%2Fguest-user.jpg?alt=media&token=89b9d97f-c7d9-41db-a946-b9e1fa38e105"
     };
-    await FirebaseFirestore.instance.collection('users').doc(uid).set(mp);
+    await FirebaseFirestore.instance.collection('users').doc(username).set(mp);
   }
+
+  Future addImageUrlToUser(String username, String url) async {
+    return await FirebaseFirestore.instance
+        .collection('users')
+        .doc(username)
+        .update({'imageUrl': url}).then((value) => print('image updated'));
+  }
+
+  // Future updateImageUrlInChatRoom(String username, String url) async {
+  //   final batch = FirebaseFirestore.instance.batch();
+  //   var x = FirebaseFirestore.instance
+  //       .collection('chat_room')
+  //       .where('users', arrayContains: username);
+  //   batch.update(x, data);
+  // }
 
   Future getUserByEmail(String email) async {
     return await FirebaseFirestore.instance
@@ -60,7 +77,6 @@ class Database {
         .collection('chats')
         .add(mp);
   }
-
   Stream getTextFromChatRoom(String chatId) {
     print('getText called');
     return FirebaseFirestore.instance

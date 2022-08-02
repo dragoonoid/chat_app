@@ -72,7 +72,6 @@ class _AllChatScreenState extends State<AllChatScreen> {
     String otherUser = chatUsers[0].toString().compareTo(username) == 0
         ? chatUsers[1]
         : chatUsers[0];
-    //String url = await storage.getProfileImage(otherUser);
     return Container(
       decoration: const BoxDecoration(
         color: Colors.white,
@@ -90,6 +89,7 @@ class _AllChatScreenState extends State<AllChatScreen> {
             otherUser[0].toUpperCase(),
             style: const TextStyle(color: Colors.black),
           ),
+          //backgroundImage: NetworkImage(data['imageUrl']),
         ),
         title: Text(otherUser),
         trailing: PopupMenuButton<int>(

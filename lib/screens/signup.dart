@@ -1,7 +1,9 @@
+import 'package:chatapp/model/user_provider.dart';
 import 'package:chatapp/services/auth.dart';
 import 'package:chatapp/services/database.dart';
 import 'package:chatapp/services/get_shared_prefs.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class SignUp extends StatefulWidget {
   const SignUp({Key? key}) : super(key: key);
@@ -33,6 +35,7 @@ class _SignUpState extends State<SignUp> {
       await prefs.setEmail(email.text);
       await prefs.setIsLogIn(true);
       await prefs.setUsername(name.text);
+      await Provider.of<UserProvider>(context,listen: false).getDetailsFromDevice();
       Navigator.of(context)
           .pushNamedAndRemoveUntil('/all_chat_screen', (route) => false);
     }

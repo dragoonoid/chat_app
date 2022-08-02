@@ -1,5 +1,6 @@
 import 'package:chatapp/model/user.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class AuthFirebase {
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -53,6 +54,8 @@ class AuthFirebase {
 
   Future signOut() async {
     try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      await prefs.clear();
       return await _auth.signOut();
     } catch (e) {
       // ignore: avoid_print
