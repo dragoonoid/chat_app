@@ -35,7 +35,10 @@ class _SignUpState extends State<SignUp> {
       await prefs.setEmail(email.text);
       await prefs.setIsLogIn(true);
       await prefs.setUsername(name.text);
-      await Provider.of<UserProvider>(context,listen: false).getDetailsFromDevice();
+      await prefs.setImageUrl(
+          'https://firebasestorage.googleapis.com/v0/b/chatapp-29812.appspot.com/o/user_image%2Fguest-user.jpg?alt=media&token=89b9d97f-c7d9-41db-a946-b9e1fa38e105');
+      await Provider.of<UserProvider>(context, listen: false)
+          .getDetailsFromDevice();
       Navigator.of(context)
           .pushNamedAndRemoveUntil('/all_chat_screen', (route) => false);
     }
@@ -109,12 +112,12 @@ class _SignUpState extends State<SignUp> {
                         ),
                       ),
                       button(
-                          c: Colors.amber[300],
+                          c: Colors.blue[600],
                           context: context,
                           t: 'Create Account',
                           route: () => signUp(),
                           weight: FontWeight.bold,
-                          textColor: Colors.black),
+                          textColor: Colors.white),
                       button(
                           c: Colors.white10,
                           context: context,
@@ -144,24 +147,24 @@ class _SignUpState extends State<SignUp> {
                           c: Colors.white,
                           context: context,
                           t: 'Login with Google    ',
-                          route: () =>
-                              Navigator.of(context).pushReplacementNamed('/signin'),
+                          route: () => Navigator.of(context)
+                              .pushReplacementNamed('/signin'),
                           weight: FontWeight.bold,
                           textColor: Colors.black),
                       button(
                           c: Colors.white,
                           context: context,
                           t: 'Login with Facebook',
-                          route: () =>
-                              Navigator.of(context).pushReplacementNamed('/signin'),
+                          route: () => Navigator.of(context)
+                              .pushReplacementNamed('/signin'),
                           weight: FontWeight.bold,
                           textColor: Colors.black),
                       button(
                           c: Colors.white,
                           context: context,
                           t: 'Login with Apple     ',
-                          route: () =>
-                              Navigator.of(context).pushReplacementNamed('/signin'),
+                          route: () => Navigator.of(context)
+                              .pushReplacementNamed('/signin'),
                           weight: FontWeight.bold,
                           textColor: Colors.black),
                     ],

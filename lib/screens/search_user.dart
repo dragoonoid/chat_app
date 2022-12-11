@@ -20,7 +20,7 @@ class _SearchUserState extends State<SearchUser> {
   Database db = Database();
   late QuerySnapshot snapshot;
   GetSharedPrefs prefs = GetSharedPrefs();
-  AddImage storage=AddImage();
+  AddImage storage = AddImage();
 
   var data = null;
   search(String s) async {
@@ -59,23 +59,26 @@ class _SearchUserState extends State<SearchUser> {
     String myName = await prefs.getUsername();
     String myEmail = await prefs.getEmail();
     String chatId = createChatId(searchedUsername, myName);
-    //String myUrl=await storage.getProfileImage(myName);
-    //String Url=await storage.getProfileImage(searchedUsername);
+    String myUrl = await storage.getProfileImage(myName);
+    String Url = await storage.getProfileImage(searchedUsername);
     Map<String, dynamic> mp = {
       'id': chatId,
       'users': [searchedUsername, myName],
       'emails': [searchEmail, myEmail],
-      //'imageUrl':[Url,myUrl]
+      'imageUrl_$myName': myUrl,
+      'imageUrl_$searchedUsername': Url
     };
     await db.createChatRoom(chatId, mp);
+    // ignore: use_build_context_synchronously
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) =>  Conversation(chatId: chatId,),
+        builder: (context) => Conversation(
+          chatId: chatId,
+          profileImageUrl: Url,
+        ),
       ),
     );
-    // Navigator.of(context)
-    //     .pushNamed('/conversation', arguments: {'chatId': chatId});
   }
 
   createChatId(String a, String b) {
@@ -104,7 +107,7 @@ class _SearchUserState extends State<SearchUser> {
             Text(email),
           ],
         ),
-        Spacer(),
+        const Spacer(),
         GestureDetector(
           onTap: () => createChatRoon(username, email),
           child: Container(
@@ -139,7 +142,7 @@ class _SearchUserState extends State<SearchUser> {
                     color: Colors.white),
                 child: Center(
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal:8.0),
+                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
                     child: Row(
                       children: [
                         const Icon(Icons.search),

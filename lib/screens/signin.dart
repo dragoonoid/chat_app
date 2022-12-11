@@ -1,4 +1,5 @@
 import 'package:chatapp/model/user_provider.dart';
+import 'package:chatapp/services/add_image.dart';
 import 'package:chatapp/services/auth.dart';
 import 'package:chatapp/services/database.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -22,8 +23,10 @@ class _SignInState extends State<SignIn> {
   AuthFirebase auth = AuthFirebase();
   GetSharedPrefs prefs=GetSharedPrefs();
   Database db=Database();
+  AddImage storage=AddImage();
   bool isLoading = false;
   late QuerySnapshot snapshot;
+  // ignore: avoid_init_to_null
   var data=null;
 
   signIn() async{
@@ -40,12 +43,14 @@ class _SignInState extends State<SignIn> {
       }
       else{
         await db.getUserByEmail(email.text).then((value) => snapshot=value);
-        //print(data[0]['email']);
         data = snapshot.docs.map((doc) => doc.data()).toList();
+        print('--------------------------');
         print(data);
         await prefs.setEmail(data[0]['email']);
         await prefs.setUsername(data[0]['username']);
         await prefs.setIsLogIn(true);
+        await prefs.setImageUrl(data[0]['imageUrl']);
+        print(data[0]['imageUrl']);
         await Provider.of<UserProvider>(context,listen: false).getDetailsFromDevice();
         Navigator.of(context).pushNamedAndRemoveUntil('/all_chat_screen', (route) => false);
       }
@@ -108,12 +113,12 @@ class _SignInState extends State<SignIn> {
                         ),
                       ),
                       button(
-                          c: Colors.amber[300],
+                          c: Colors.blue[600],
                           context: context,
                           t: 'Login ',
                           route: ()=>signIn(),
                           weight: FontWeight.bold,
-                          textColor: Colors.black),
+                          textColor: Colors.white),
                       button(
                           c: Colors.white10,
                           context: context,

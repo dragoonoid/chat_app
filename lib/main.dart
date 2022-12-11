@@ -27,9 +27,7 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  // This widget is the root of your application.
   bool? login = false;
-  @override
   // void didChangeDependencies() async{
   //   super.didChangeDependencies();
   //   await Provider.of<UserProvider>(context, listen: false).getDetailsFromDevice();
@@ -43,6 +41,7 @@ class _MyAppState extends State<MyApp> {
   //   print(login);
   //   print('oi');
   // }
+  
   helper()async{
     await Provider.of<UserProvider>(context, listen: false).getDetailsFromDevice();
     var x = Provider.of<UserProvider>(context, listen: false).isLoggedIn;
@@ -60,9 +59,6 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     //TODO use future builder
-    print('first');
-    print(login);
-    print('second');
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Flutter Demo',

@@ -5,6 +5,7 @@ class GetSharedPrefs {
   String usernameKey = 'username';
   String emailKey = 'email';
   String passwordKey = 'password';
+  String imageUrlKey='imageUrl';
   Future setIsLogIn(bool x) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     prefs.setBool(loggedInKey, x);
@@ -18,6 +19,16 @@ class GetSharedPrefs {
   Future setEmail(String x) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     prefs.setString(emailKey, x);
+  }
+
+  Future setImageUrl(String x) async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setString(imageUrlKey, x);
+  }
+
+  Future getImageUrl() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    return prefs.getString(imageUrlKey);
   }
 
   Future getIsLogIn() async {

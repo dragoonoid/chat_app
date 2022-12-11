@@ -51,19 +51,21 @@ class _WelcomeState extends State<Welcome> {
               height: 15,
             ),
             button(
-              c: Colors.amber[200],
+              c: Colors.blue[600],
               context: context,
               t: 'Get Started',
               func: "up",
+              textColor: Colors.white,
             ),
             const SizedBox(
               height: 15,
             ),
             button(
-              c: Colors.orange[50],
+              c: Colors.white,
               context: context,
               t: 'Already have an account.',
               func: "in",
+              textColor: Colors.black,
             ),
           ],
         ),
@@ -76,7 +78,8 @@ button(
     {required Color? c,
     required BuildContext context,
     required String t,
-    required String func}) {
+    required String func,
+    required Color textColor}) {
   return Center(
     child: GestureDetector(
       onTap: () {
@@ -97,7 +100,7 @@ button(
         child: Center(
           child: Text(
             t,
-            style: const TextStyle(color: Colors.black,),
+            style: TextStyle(color: textColor,),
           ),
         ),
       ),

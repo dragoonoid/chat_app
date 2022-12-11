@@ -2,10 +2,14 @@ import 'dart:io';
 import 'package:chatapp/model/user_provider.dart';
 import 'package:chatapp/services/add_image.dart';
 import 'package:chatapp/services/auth.dart';
+import 'package:chatapp/services/get_shared_prefs.dart';
+import 'package:chatapp/services/saveAndPickImage.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+
+import '../services/database.dart';
 
 class Identity extends StatefulWidget {
   const Identity({Key? key}) : super(key: key);
@@ -17,7 +21,10 @@ class Identity extends StatefulWidget {
 class _IdentityState extends State<Identity> {
   bool sheet = false;
   AuthFirebase auth = AuthFirebase();
+  GetSharedPrefs prefs = GetSharedPrefs();
+  Database db=Database();
   final AddImage storage = AddImage();
+  SaveAndPickImage saveAndPickImage=SaveAndPickImage();
   late String username;
   late String email;
   String? url = null;
@@ -30,7 +37,8 @@ class _IdentityState extends State<Identity> {
 
   @override
   void didChangeDependencies() async {
-    String? x = await storage.getProfileImage(username);
+    String? x = await prefs.getImageUrl();
+    //String? x = await storage.getProfileImage(username);
     if (x != null) {
       setState(() {
         url = x;
@@ -50,7 +58,8 @@ class _IdentityState extends State<Identity> {
             color: Colors.black,
           ),
           onPressed: () {
-            Navigator.pop(context);
+            Navigator.of(context)
+                              .pushNamed('/all_chat_screen');
           },
         ),
         title: const Text(
@@ -82,9 +91,9 @@ class _IdentityState extends State<Identity> {
             'Username',
             username,
             true,
-            const Icon(
+            Icon(
               Icons.person,
-              color: Colors.amber,
+              color: Colors.blue[600],
               size: 40,
             ),
             () {},
@@ -96,9 +105,9 @@ class _IdentityState extends State<Identity> {
             'Email',
             email,
             true,
-            const Icon(
+            Icon(
               Icons.email,
-              color: Colors.amber,
+              color: Colors.blue[600],
               size: 40,
             ),
             () {},
@@ -112,59 +121,65 @@ class _IdentityState extends State<Identity> {
 
   image() {
     return GestureDetector(
-      onTap: () async {
-        FilePickerResult? result = await FilePicker.platform.pickFiles(
-          allowMultiple: false,
-          type: FileType.custom,
-          allowedExtensions: ['png', 'jpg'],
-        );
-
+      onTap: (){
+        saveAndPickImage.openImage(url??'', context);
+      },
+      onDoubleTap: () async {
+        FilePickerResult? result = await saveAndPickImage.pickImage();
         if (result != null) {
           final path = result.files.single.path ?? "";
           final fileName = result.files.single.name;
-          print(path);
-          print(fileName);
-          setState(() {
-            url=null;
-          });
+          // setState(() {
+          //   url = null;
+          // });
           await storage.addProfileImage(fileName, path, username);
-          String? x = await storage.getProfileImage(username);
-          if (x != null) {
-            setState(() {
-              url = x;
-            });
-          }
+          String x = await storage.getProfileImage(username);
+          await db.addImageUrlToUser(username, x);
+          await prefs.setImageUrl(x);
+          await db.changeProfileImagesInChatRooms(username,x);
+          await Provider.of<UserProvider>(context, listen: false)
+              .getDetailsFromDevice();
+          setState(() {
+            url = x;
+          });
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(content: Text('File Picker Closed')));
         }
       },
-      onLongPress: url=="https://firebasestorage.googleapis.com/v0/b/chatapp-29812.appspot.com/o/user_image%2Fguest-user.jpg?alt=media&token=89b9d97f-c7d9-41db-a946-b9e1fa38e105"?(){}:() => showDialog(
-          context: context,
-          builder: (_) {
-            return AlertDialog(
-              title:
-                  const Text('You surely want to delete this profile picture?'),
-              content: const Text('Once deleted it cannot be recovered!'),
-              actions: [
-                TextButton(
-                    onPressed: () async {
-                      String x = await storage.deleteProflieImage(username);
-                      setState(() {
-                        url = x;
-                      });
-                      Navigator.pop(context);
-                    },
-                    child: const Text('Yes')),
-                TextButton(
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                  child: const Text('No'),
-                )
-              ],
-            );
-          }),
+      onLongPress: url ==
+              "https://firebasestorage.googleapis.com/v0/b/chatapp-29812.appspot.com/o/user_image%2Fguest-user.jpg?alt=media&token=89b9d97f-c7d9-41db-a946-b9e1fa38e105"
+          ? () {}
+          : () => showDialog(
+              context: context,
+              builder: (_) {
+                return AlertDialog(
+                  title: const Text(
+                      'You surely want to delete this profile picture?'),
+                  content: const Text('Once deleted it cannot be recovered!'),
+                  actions: [
+                    TextButton(
+                        onPressed: () async {
+                          String x = await storage.deleteProflieImage(username);
+                          setState(() {
+                            url = x;
+                          });
+                          await prefs.setImageUrl(x);
+                          await Provider.of<UserProvider>(context,
+                                  listen: false)
+                              .getDetailsFromDevice();
+                          Navigator.pop(context);
+                        },
+                        child: const Text('Yes')),
+                    TextButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
+                      child: const Text('No'),
+                    )
+                  ],
+                );
+              }),
       child: url == null
           ? const Center(
               child: CircleAvatar(
@@ -180,7 +195,8 @@ class _IdentityState extends State<Identity> {
           : Center(
               child: CircleAvatar(
                 radius: 80,
-                backgroundImage: NetworkImage(url ?? ""),
+                backgroundImage: const AssetImage('images/loading.jpg'),
+                foregroundImage: NetworkImage(url ?? ""),
               ),
             ),
     );
@@ -196,9 +212,9 @@ class _IdentityState extends State<Identity> {
       child: ListTile(
         leading: icon,
         trailing: IconButton(
-          icon: const Icon(
+          icon: Icon(
             Icons.edit,
-            color: Colors.amber,
+            color: Colors.grey[400],
           ),
           onPressed: func,
         ),

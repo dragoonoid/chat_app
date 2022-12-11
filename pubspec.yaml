@@ -47,6 +47,11 @@ dependencies:
   gallery_saver: ^2.3.2
   dio: ^4.0.6
   path_provider: ^2.0.11
+  flutter_sound: ^9.2.13 # recording sound
+  permission_handler: ^10.2.0 # taking permission from user
+  uuid: #unique id generator using uuid algo
+  audioplayers: ^0.20.1 # to play audio online
+  video_player: ^2.4.9 # play online video
 
 dev_dependencies:
   flutter_test:
