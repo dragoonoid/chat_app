@@ -27,11 +27,26 @@ class _SignUpState extends State<SignUp> {
       setState(() {
         isLoading = true;
       });
-      var uid;
-      await auth
-          .signUpEmail(email.text, password.text)
-          .then((value) => uid = value.userId);
-      await db.publishUser(uid, email.text, password.text, name.text);
+      //var uid;
+      bool exists = await db.checkUserExists(name.text);
+      if (exists == true) {
+        setState(() {
+          isLoading = false;
+        });
+        ScaffoldMessenger.of(context)
+            .showSnackBar(const SnackBar(content: Text('Already a user')));
+        return;
+      }
+      dynamic x = await auth.signUpEmail(email.text, password.text);
+      if (x == null) {
+        setState(() {
+          isLoading = false;
+        });
+        ScaffoldMessenger.of(context)
+            .showSnackBar(const SnackBar(content: Text('Already a user')));
+        return;
+      }
+      await db.publishUser(email.text, password.text, name.text);
       await prefs.setEmail(email.text);
       await prefs.setIsLogIn(true);
       await prefs.setUsername(name.text);
@@ -78,7 +93,8 @@ class _SignUpState extends State<SignUp> {
                               name,
                               (a) {
                                 return a.toString().isEmpty ||
-                                        a.toString().length < 4
+                                        a.toString().length < 4 ||
+                                        a.toString().contains('_')
                                     ? 'The username is invalid'
                                     : null;
                               },

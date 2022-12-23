@@ -5,6 +5,8 @@ import 'package:chatapp/screens/search_user.dart';
 import 'package:chatapp/screens/signin.dart';
 import 'package:chatapp/screens/signup.dart';
 import 'package:chatapp/screens/welcome.dart';
+import 'package:chatapp/services/database.dart';
+import 'package:chatapp/themes/app_theme.dart';
 import 'package:flutter/material.dart';
 
 import 'package:firebase_core/firebase_core.dart';
@@ -17,33 +19,28 @@ void main() async {
   await Firebase.initializeApp();
   runApp(ChangeNotifierProvider(
     create: (context) => UserProvider(),
-    child: MyApp(),
+    child: ChangeNotifierProvider(
+      create: (context) => ThemeProvider(),
+      child: MyApp(),
+    ),
   ));
 }
 
 class MyApp extends StatefulWidget {
+  const MyApp({Key? key}) : super(key: key);
+
   @override
   State<MyApp> createState() => _MyAppState();
 }
 
 class _MyAppState extends State<MyApp> {
   bool? login = false;
-  // void didChangeDependencies() async{
-  //   super.didChangeDependencies();
-  //   await Provider.of<UserProvider>(context, listen: false).getDetailsFromDevice();
-  //   var x = Provider.of<UserProvider>(context, listen: false).isLoggedIn;
-  //   if (x != null) {
-  //     setState(() {
-  //       login = x;
-  //     });
-  //   }
-  //   print('io');
-  //   print(login);
-  //   print('oi');
-  // }
-  
-  helper()async{
-    await Provider.of<UserProvider>(context, listen: false).getDetailsFromDevice();
+  helper() async {
+    await Provider.of<UserProvider>(context, listen: false)
+        .getDetailsFromDevice();
+    await Provider.of<ThemeProvider>(context, listen: false)
+        .getThemeFromDevice();
+
     var x = Provider.of<UserProvider>(context, listen: false).isLoggedIn;
     if (x != null) {
       setState(() {
@@ -51,11 +48,18 @@ class _MyAppState extends State<MyApp> {
       });
     }
   }
+
   @override
-  void didChangeDependencies() async{
+  void didChangeDependencies() async {
     await helper();
     super.didChangeDependencies();
   }
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     //TODO use future builder

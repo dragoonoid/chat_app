@@ -1,6 +1,8 @@
 import 'dart:io';
 import 'package:chatapp/services/saveAndPickImage.dart';
+import 'package:chatapp/themes/app_theme.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../services/database.dart';
 
@@ -17,9 +19,10 @@ class _FriendsProfileState extends State<FriendsProfile> {
   bool isLoading = true;
   bool sheet = false;
   Database db = Database();
-  SaveAndPickImage saveAndPickImage=SaveAndPickImage();
+  SaveAndPickImage saveAndPickImage = SaveAndPickImage();
   String imageUrl = '';
   String email = '';
+  var theme;
   var data;
   @override
   void didChangeDependencies() async {
@@ -38,22 +41,32 @@ class _FriendsProfileState extends State<FriendsProfile> {
 
   @override
   Widget build(BuildContext context) {
+    theme = Provider.of<ThemeProvider>(context);
     String username = widget.friendsUsername;
     return Scaffold(
+      backgroundColor: theme.appBackColor,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        elevation: 0,
+        backgroundColor: theme.appBackColor,
         leading: IconButton(
-          icon: const Icon(
+          icon: Icon(
             Icons.arrow_back_ios,
-            color: Colors.black,
+            color: theme.titleColor,
           ),
           onPressed: () {
             Navigator.pop(context);
           },
         ),
+        actions: [
+          Switch(
+              value: theme.isDark(),
+              onChanged: (_) {
+                theme.changeTheme();
+              }),
+        ],
         title: Text(
           widget.friendsUsername,
-          style:const TextStyle(color: Colors.black),
+          style: TextStyle(color: theme.titleColor),
         ),
       ),
       body: Padding(
@@ -66,16 +79,31 @@ class _FriendsProfileState extends State<FriendsProfile> {
                 children: [
                   Center(
                     child: GestureDetector(
-                      onTap: (){
+                      onTap: () {
                         saveAndPickImage.openImage(imageUrl, context);
                       },
-                      onDoubleTap: (){
-                        saveAndPickImage.saveImage(imageUrl);
+                      onLongPress: () async {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Downloading...'),
+                          ),
+                        );
+                        await saveAndPickImage.saveImage(imageUrl);
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Profile downloaded'),
+                          ),
+                        );
                       },
                       child: CircleAvatar(
-                        radius: 80,
-                        backgroundImage: const AssetImage('images/loading.jpg'),
-                        foregroundImage: NetworkImage(imageUrl),
+                        radius: 82,
+                        backgroundColor: Colors.grey[300],
+                        child: CircleAvatar(
+                          radius: 80,
+                          backgroundImage:
+                              const AssetImage('images/loading.jpg'),
+                          foregroundImage: NetworkImage(imageUrl),
+                        ),
                       ),
                     ),
                   ),
@@ -102,7 +130,7 @@ class _FriendsProfileState extends State<FriendsProfile> {
       ),
       subtitle: Text(
         subTitle,
-        style: const TextStyle(fontWeight: FontWeight.bold),
+        style: TextStyle(color: theme.titleColor),
       ),
     );
   }

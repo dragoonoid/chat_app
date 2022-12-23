@@ -1,13 +1,17 @@
 import 'package:audioplayers/audioplayers.dart';
+import 'package:chatapp/themes/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:flutter/src/foundation/key.dart';
+import 'package:provider/provider.dart';
 
 // ignore: must_be_immutable
 class AudioPlayerWidget extends StatefulWidget {
   final String url;
   final bool curUser;
-  const AudioPlayerWidget({Key? key, required this.url, required this.curUser})
+  final String time;
+  const AudioPlayerWidget(
+      {Key? key, required this.url, required this.curUser, required this.time})
       : super(key: key);
 
   @override
@@ -19,7 +23,7 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget> {
   bool isAudioPlaying = false;
   Duration duration = Duration.zero;
   Duration position = Duration.zero;
-
+  var theme;
   @override
   void initState() {
     audioPlayer.onPlayerStateChanged.listen((event) {
@@ -48,38 +52,57 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
+    theme = Provider.of<ThemeProvider>(context);
+    return Column(
       children: [
-        IconButton(
-          onPressed: () async {
-            if (isAudioPlaying) {
-              await audioPlayer.pause();
-            } else {
-              await audioPlayer.play(widget.url);
-            }
-            setState(() {
-              isAudioPlaying = !isAudioPlaying;
-            });
-          },
-          icon: Icon(
-            isAudioPlaying ? Icons.pause : Icons.play_arrow,
-            color: widget.curUser ? Colors.black : Colors.white,
+        Row(
+          children: [
+            IconButton(
+              onPressed: () async {
+                if (isAudioPlaying) {
+                  await audioPlayer.pause();
+                } else {
+                  await audioPlayer.play(widget.url);
+                }
+                setState(() {
+                  isAudioPlaying = !isAudioPlaying;
+                });
+              },
+              icon: Icon(
+                isAudioPlaying ? Icons.pause : Icons.play_arrow,
+                color:
+                    widget.curUser ? theme.audioSendPlay : theme.audioRecePlay,
+              ),
+            ),
+            Expanded(
+              child: Slider(
+                min: 0,
+                max: duration.inSeconds.toDouble(),
+                value: position.inSeconds.toDouble(),
+                thumbColor:
+                    widget.curUser ? theme.audioSendDot : theme.audioReceDot,
+                activeColor: widget.curUser
+                    ? theme.audioSendActive
+                    : theme.audioReceActive,
+                inactiveColor: widget.curUser
+                    ? theme.audioSendInactive
+                    : theme.audioReceInactive,
+                onChanged: (val) async {
+                  final position = Duration(seconds: val.toInt());
+                  await audioPlayer.seek(position);
+                },
+              ),
+            )
+          ],
+        ),
+        Text(
+          widget.time,
+          textAlign: TextAlign.end,
+          style: TextStyle(
+            color: widget.curUser ? theme.sendTime : theme.receiveTime,
+            fontSize: 12,
           ),
         ),
-        Expanded(
-          child: Slider(
-            min: 0,
-            max: duration.inSeconds.toDouble(),
-            value: position.inSeconds.toDouble(),
-            thumbColor: widget.curUser ? Colors.black : Colors.white,
-            activeColor: widget.curUser ? Colors.black : Colors.white,
-            inactiveColor: widget.curUser ? Colors.white : Colors.black,
-            onChanged: (val) async {
-              final position = Duration(seconds: val.toInt());
-              await audioPlayer.seek(position);
-            },
-          ),
-        )
       ],
     );
   }

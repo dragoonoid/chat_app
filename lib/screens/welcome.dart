@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class Welcome extends StatefulWidget {
+  const Welcome({Key? key}) : super(key: key);
+
   @override
   State<Welcome> createState() => _WelcomeState();
 }

@@ -4,6 +4,7 @@ import 'package:chatapp/screens/conversation.dart';
 import 'package:chatapp/services/add_image.dart';
 import 'package:chatapp/services/database.dart';
 import 'package:chatapp/services/get_shared_prefs.dart';
+import 'package:chatapp/themes/app_theme.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -21,8 +22,14 @@ class _SearchUserState extends State<SearchUser> {
   late QuerySnapshot snapshot;
   GetSharedPrefs prefs = GetSharedPrefs();
   AddImage storage = AddImage();
-
+  var theme;
   var data = null;
+
+  @override
+  void dispose() {
+    username.dispose();
+    super.dispose();
+  }
   search(String s) async {
     if (username.text == null || username.text.isEmpty) {
       return;
@@ -51,7 +58,10 @@ class _SearchUserState extends State<SearchUser> {
             itemCount: snapshot.docs.length,
           )
         : Container(
-            child: const Text('No such username found'),
+            child: Text(
+              'No such username found',
+              style: TextStyle(color: theme.titleColor),
+            ),
           );
   }
 
@@ -100,11 +110,12 @@ class _SearchUserState extends State<SearchUser> {
           children: [
             Text(
               username,
-              style: const TextStyle(
+              style: TextStyle(
                 fontWeight: FontWeight.bold,
+                color: theme.titleColor,
               ),
             ),
-            Text(email),
+            Text(email,style: TextStyle(color: theme.subtitleColor)),
           ],
         ),
         const Spacer(),
@@ -129,7 +140,9 @@ class _SearchUserState extends State<SearchUser> {
 
   @override
   Widget build(BuildContext context) {
+    theme = Provider.of<ThemeProvider>(context);
     return Scaffold(
+      backgroundColor: theme.appBackColor,
       body: SafeArea(
         child: Container(
           margin: const EdgeInsets.fromLTRB(20, 0, 20, 0),
@@ -139,24 +152,29 @@ class _SearchUserState extends State<SearchUser> {
               Container(
                 decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(30),
-                    color: Colors.white),
+                    color: theme.searchBack),
                 child: Center(
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 8.0),
                     child: Row(
                       children: [
-                        const Icon(Icons.search),
+                        Icon(
+                          Icons.search,
+                          color: theme.searchIcon,
+                        ),
                         const SizedBox(
                           width: 5,
                         ),
                         SizedBox(
                           width: MediaQuery.of(context).size.width * 0.7,
                           child: TextField(
+                            style: TextStyle(color: theme.titleColor),
                             onChanged: search,
                             onSubmitted: search,
                             controller: username,
-                            decoration: const InputDecoration(
+                            decoration: InputDecoration(
                               hintText: 'Search Username',
+                              hintStyle: TextStyle(color: theme.titleColor),
                               border: InputBorder.none,
                             ),
                           ),

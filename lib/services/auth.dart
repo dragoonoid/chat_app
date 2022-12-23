@@ -1,5 +1,7 @@
 import 'package:chatapp/model/user.dart';
+import 'package:chatapp/services/database.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AuthFirebase {
@@ -26,6 +28,10 @@ class AuthFirebase {
         print('Wrong password provided for that user.');
         return null;
       }
+      else{
+        print('Error: ${e.code}');
+        return null;
+      }
     }
   }
 
@@ -39,9 +45,9 @@ class AuthFirebase {
       // ignore: avoid_print
       print(e);
       print('22222222');
+      return null;
     }
   }
-
   Future resetPassword(String email) async {
     try {
       return await _auth.sendPasswordResetEmail(email: email);
@@ -52,10 +58,11 @@ class AuthFirebase {
     }
   }
 
-  Future signOut() async {
+  Future signOut(String time, BuildContext context) async {
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       await prefs.clear();
+      await Database().setOnlineStatusLastSeen(time, false, context);
       return await _auth.signOut();
     } catch (e) {
       // ignore: avoid_print

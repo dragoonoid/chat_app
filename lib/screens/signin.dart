@@ -102,7 +102,7 @@ class _SignInState extends State<SignIn> {
                               password,
                               (a) {
                                 String s = a.toString();
-                                if (s.isEmpty || s.length < 8) {
+                                if (s.isEmpty || s.length < 8 ) {
                                   return 'Please enter a valid password of atleast 8 characters';
                                 }
                                 return null;

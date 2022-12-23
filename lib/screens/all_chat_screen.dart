@@ -5,8 +5,10 @@ import 'package:chatapp/services/add_image.dart';
 import 'package:chatapp/services/auth.dart';
 import 'package:chatapp/services/database.dart';
 import 'package:chatapp/services/get_shared_prefs.dart';
+import 'package:chatapp/themes/app_theme.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 class AllChatScreen extends StatefulWidget {
@@ -16,7 +18,8 @@ class AllChatScreen extends StatefulWidget {
   State<AllChatScreen> createState() => _AllChatScreenState();
 }
 
-class _AllChatScreenState extends State<AllChatScreen> {
+class _AllChatScreenState extends State<AllChatScreen>
+    with WidgetsBindingObserver {
   String profileImageUrl =
       'https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=387&q=80';
   AuthFirebase auth = AuthFirebase();
@@ -26,6 +29,7 @@ class _AllChatScreenState extends State<AllChatScreen> {
   GetSharedPrefs prefs = GetSharedPrefs();
   String username = "";
   int currentSelectedBottomBar = 0;
+  var theme;
   @override
   void initState() {
     username = Provider.of<UserProvider>(context, listen: false).username ?? "";
@@ -33,7 +37,27 @@ class _AllChatScreenState extends State<AllChatScreen> {
     db.getUserImageUrl(username);
     profileImageUrl =
         Provider.of<UserProvider>(context, listen: false).imageUrl ?? "";
+    WidgetsBinding.instance.addObserver(this);
+    db.setOnlineStatusLastSeen('', true, context);
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    String time=DateFormat.yMEd().add_jms().format(DateTime.now());
+    print('state = $state');
+    if (state != AppLifecycleState.resumed) {
+      db.setOnlineStatusLastSeen(time, false, context);
+    } 
+    else {
+      db.setOnlineStatusLastSeen(time, true, context);
+    }
   }
 
   chatRoomList() {
@@ -80,8 +104,8 @@ class _AllChatScreenState extends State<AllChatScreen> {
       },
       child: Container(
         margin: const EdgeInsets.only(top: 10),
-        decoration: const BoxDecoration(
-          color: Colors.white,
+        decoration: BoxDecoration(
+          color: theme.tileColor,
         ),
         child: ListTile(
           //dense: true,
@@ -93,12 +117,18 @@ class _AllChatScreenState extends State<AllChatScreen> {
           ),
           title: Text(
             otherUser,
-            style: const TextStyle(
-              fontWeight: FontWeight.bold,
-            ),
+            style:
+                TextStyle(fontWeight: FontWeight.bold, color: theme.titleColor),
           ),
-          subtitle: const Text('Last Test'),
+          subtitle: Text(
+            'Last Test',
+            style: TextStyle(color: theme.subtitleColor),
+          ),
           trailing: PopupMenuButton<int>(
+            icon: Icon(
+              Icons.menu,
+              color: theme.deleteColor,
+            ),
             itemBuilder: (context) => [
               const PopupMenuItem(
                 value: 1,
@@ -147,7 +177,7 @@ class _AllChatScreenState extends State<AllChatScreen> {
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12),
-        color: Colors.grey[100],
+        color: theme.searchBack,
       ),
       child: GestureDetector(
         onTap: () {
@@ -157,11 +187,11 @@ class _AllChatScreenState extends State<AllChatScreen> {
           children: [
             Icon(
               Icons.search,
-              color: Colors.grey[500],
+              color: theme.searchIcon,
             ),
             Text(
               '   Search',
-              style: TextStyle(color: Colors.grey[600]),
+              style: TextStyle(color: theme.searchIcon),
             ),
           ],
         ),
@@ -175,13 +205,22 @@ class _AllChatScreenState extends State<AllChatScreen> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          const Text(
+          Text(
             'Messages',
             style: TextStyle(
-              color: Colors.black,
+              color: theme.titleColor,
               fontSize: 20,
               fontWeight: FontWeight.w500,
             ),
+          ),
+          Spacer(),
+          Switch(
+              value: theme.isDark(),
+              onChanged: (_) {
+                theme.changeTheme();
+              }),
+          const SizedBox(
+            width: 10,
           ),
           GestureDetector(
             onTap: () {
@@ -208,7 +247,7 @@ class _AllChatScreenState extends State<AllChatScreen> {
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(15),
-        color: Colors.grey[50],
+        color: theme.bottomBarBack,
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -220,8 +259,8 @@ class _AllChatScreenState extends State<AllChatScreen> {
             icon: Icon(
               Icons.message,
               color: currentSelectedBottomBar == 0
-                  ? Colors.blue[600]
-                  : Colors.grey[400],
+                  ? theme.selectedIcon
+                  : theme.unSelectedIcon,
             ),
           ),
           IconButton(
@@ -231,8 +270,8 @@ class _AllChatScreenState extends State<AllChatScreen> {
             icon: Icon(
               Icons.call,
               color: currentSelectedBottomBar == 1
-                  ? Colors.blue[600]
-                  : Colors.grey[400],
+                  ? theme.selectedIcon
+                  : theme.unSelectedIcon,
             ),
           ),
           IconButton(
@@ -242,8 +281,8 @@ class _AllChatScreenState extends State<AllChatScreen> {
             icon: Icon(
               Icons.people,
               color: currentSelectedBottomBar == 2
-                  ? Colors.blue[600]
-                  : Colors.grey[400],
+                  ? theme.selectedIcon
+                  : theme.unSelectedIcon,
             ),
           ),
           IconButton(
@@ -253,8 +292,8 @@ class _AllChatScreenState extends State<AllChatScreen> {
             icon: Icon(
               Icons.settings,
               color: currentSelectedBottomBar == 3
-                  ? Colors.blue[600]
-                  : Colors.grey[400],
+                  ? theme.selectedIcon
+                  : theme.unSelectedIcon,
             ),
           ),
         ],
@@ -272,8 +311,9 @@ class _AllChatScreenState extends State<AllChatScreen> {
 
   @override
   Widget build(BuildContext context) {
+    theme = Provider.of<ThemeProvider>(context);
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: theme.appBackColor,
       body: Padding(
         padding: const EdgeInsets.only(left: 15, top: 0, right: 15, bottom: 15),
         child: SafeArea(

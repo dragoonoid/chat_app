@@ -4,8 +4,10 @@ import 'package:chatapp/services/add_image.dart';
 import 'package:chatapp/services/auth.dart';
 import 'package:chatapp/services/get_shared_prefs.dart';
 import 'package:chatapp/services/saveAndPickImage.dart';
+import 'package:chatapp/themes/app_theme.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 
@@ -22,12 +24,13 @@ class _IdentityState extends State<Identity> {
   bool sheet = false;
   AuthFirebase auth = AuthFirebase();
   GetSharedPrefs prefs = GetSharedPrefs();
-  Database db=Database();
+  Database db = Database();
   final AddImage storage = AddImage();
-  SaveAndPickImage saveAndPickImage=SaveAndPickImage();
+  SaveAndPickImage saveAndPickImage = SaveAndPickImage();
   late String username;
   late String email;
   String? url = null;
+  var theme;
   @override
   void initState() {
     username = Provider.of<UserProvider>(context, listen: false).username ?? "";
@@ -49,33 +52,41 @@ class _IdentityState extends State<Identity> {
 
   @override
   Widget build(BuildContext context) {
+    theme= Provider.of<ThemeProvider>(context);
     return Scaffold(
+      backgroundColor: theme.appBackColor,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        elevation: 0,
+        backgroundColor: theme.appBackColor,
         leading: IconButton(
-          icon: const Icon(
+          icon: Icon(
             Icons.arrow_back_ios,
-            color: Colors.black,
+            color: theme.titleColor,
           ),
           onPressed: () {
-            Navigator.of(context)
-                              .pushNamed('/all_chat_screen');
+            Navigator.of(context).pushNamed('/all_chat_screen');
           },
         ),
-        title: const Text(
+        title: Text(
           'Profile',
-          style: TextStyle(color: Colors.black),
+          style: TextStyle(color: theme.titleColor),
         ),
         actions: [
+          Switch(
+              value: theme.isDark(),
+              onChanged: (_) {
+                theme.changeTheme();
+              }),
           IconButton(
             onPressed: () async {
-              await auth.signOut();
+               String time=DateFormat.yMEd().add_jms().format(DateTime.now());
+              await auth.signOut(time,context);
               Navigator.of(context)
                   .pushNamedAndRemoveUntil('/wel', (route) => false);
             },
-            icon: const Icon(
+            icon: Icon(
               Icons.account_box_sharp,
-              color: Colors.black,
+              color: theme.titleColor,
             ),
           ),
         ],
@@ -112,8 +123,6 @@ class _IdentityState extends State<Identity> {
             ),
             () {},
           ),
-          // const SizedBox(height: 5,),
-          // textWidget('',true)
         ]),
       ),
     );
@@ -121,22 +130,19 @@ class _IdentityState extends State<Identity> {
 
   image() {
     return GestureDetector(
-      onTap: (){
-        saveAndPickImage.openImage(url??'', context);
+      onTap: () {
+        saveAndPickImage.openImage(url ?? '', context);
       },
       onDoubleTap: () async {
         FilePickerResult? result = await saveAndPickImage.pickImage();
         if (result != null) {
           final path = result.files.single.path ?? "";
           final fileName = result.files.single.name;
-          // setState(() {
-          //   url = null;
-          // });
           await storage.addProfileImage(fileName, path, username);
           String x = await storage.getProfileImage(username);
           await db.addImageUrlToUser(username, x);
           await prefs.setImageUrl(x);
-          await db.changeProfileImagesInChatRooms(username,x);
+          await db.changeProfileImagesInChatRooms(username, x);
           await Provider.of<UserProvider>(context, listen: false)
               .getDetailsFromDevice();
           setState(() {
@@ -165,6 +171,7 @@ class _IdentityState extends State<Identity> {
                             url = x;
                           });
                           await prefs.setImageUrl(x);
+                          await db.changeProfileImagesInChatRooms(username, x);
                           await Provider.of<UserProvider>(context,
                                   listen: false)
                               .getDetailsFromDevice();
@@ -192,13 +199,17 @@ class _IdentityState extends State<Identity> {
                 ),
               ),
             )
-          : Center(
-              child: CircleAvatar(
-                radius: 80,
-                backgroundImage: const AssetImage('images/loading.jpg'),
-                foregroundImage: NetworkImage(url ?? ""),
+          : CircleAvatar(
+            radius: 82,
+            backgroundColor: Colors.grey[300],
+            child: Center(
+                child: CircleAvatar(
+                  radius: 80,
+                  backgroundImage: const AssetImage('images/loading.jpg'),
+                  foregroundImage: NetworkImage(url ?? ""),
+                ),
               ),
-            ),
+          ),
     );
   }
 
@@ -224,7 +235,7 @@ class _IdentityState extends State<Identity> {
         ),
         subtitle: Text(
           value,
-          style: const TextStyle(fontWeight: FontWeight.bold),
+          style:  TextStyle(color: theme.titleColor),
         ),
       ),
     );
